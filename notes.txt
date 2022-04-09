@@ -1,0 +1,39 @@
+Flow
+1. READ Document text from .txt files.
+2. GET Words from reading .txt files.
+3. Count how many times the word appear in every documents.
+4. Find TF
+5. Find IDF
+6. Find TF-IDF
+
+Needs
+1. Math library
+    - Log 10
+2. READ text file.
+
+docs = ["a b c", "b b a"]
+words = ["a", "b", "c"]
+occurences = {
+    "a": [1, 1],
+    "b": [1, 2],
+    "c": [1, 0]
+}
+tfs = {
+    "a": [1, 1],
+    "b": [1, 1,301029996],
+    "c": [1, 0]
+}
+idfs = {
+    "a": 0.30102999566,
+    "b": 0.1249387366,
+    "c": 0.60205999132
+}
+tf_idfs = {
+    "a": [1, 1],
+    "b": [1, 1,301029996],
+    "c": [1, 0]
+}
+
+TF = 1 + Log10(occurence)
+IDF = log10(countDoc / countOccurence)
+TF-IDF = tf * IDF
