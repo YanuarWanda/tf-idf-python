@@ -88,7 +88,7 @@ def displayStep3(occurences):
 def displayStep4(tfs):
     table = PrettyTable(getColumnNames("TF"))
     sortedTfs = dict(sorted(tfs.items()))
-    for word in formatData(tfs):
+    for word in sortedTfs:
         row = sortedTfs[word].copy()
         row = ['%0.3f' % x for x in row]
         row.insert(0, word)
