@@ -65,7 +65,7 @@ def getTFIDF(tfs, idfs, words, docs):
 def getColumnNames(title):
     columnNames = [title]
     for docIndex in range(1, docLength + 1):
-        columnNames.append("D" + str(docIndex + 1))
+        columnNames.append("D" + str(docIndex))
     return columnNames
 
 def displayStep1(docs):
