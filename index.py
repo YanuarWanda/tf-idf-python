@@ -2,13 +2,27 @@ import os
 import math
 from pprint import pprint
 from prettytable import PrettyTable
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
+# Hapus layar
 os.system('cls' if os.name == 'nt' else 'clear')
 
 # Global variables
-docLength = 0
+decimalNumber = '%0.4f'
+filenames = ['docs/document.txt']
+# filenames = ["docs/doc1.txt", "docs/doc2.txt", "docs/doc3.txt", "docs/doc4.txt"]
 
-# Membaca file text
+# Stem
+def stemDocument(filenames):
+    factory = StemmerFactory()
+    stemmer = factory.create_stemmer()
+    docs = []
+    for filename in filenames:
+        file = open(filename, "r")
+        docs.append(stemmer.stem(file.read()))
+    return docs
+
+# Membaca file text (Yang sudah berupa token - token)
 def readFiles(filenames):
     docs = []
     for filename in filenames:
@@ -20,6 +34,12 @@ def readFiles(filenames):
 def getWords(docs, unique = True):
     words = " ".join(str(doc) for doc in docs).split(" ")
     return set(words) if unique else words
+
+# Hapus stopword
+def removeStopword(words):
+    file = open("docs/stopwords-id.txt")
+    stopwords = file.read().split("\n")
+    return getWords([word for word in words if word not in stopwords and not any(w.isdigit() for w in word)])
 
 # Periksa jumlah kemunculan kata di setiap text
 def checkWords(words, docs):
@@ -58,13 +78,14 @@ def getTFIDF(tfs, idfs, words, docs):
         tfidfs[word] = []
         for docIndex, _ in enumerate(docs):
             tfidfs[word].append(0)
-            tfidfs[word][docIndex] = tfs[word][docIndex] * idfs[word]
+            tfidf = tfs[word][docIndex] * idfs[word]
+            tfidfs[word][docIndex] = tfidf if tfidf > 0 else 0
     return tfidfs
 
 # Tampil
 def getColumnNames(title):
     columnNames = [title]
-    for docIndex in range(1, docLength + 1):
+    for docIndex in range(1, len(filenames) + 1):
         columnNames.append("D" + str(docIndex))
     return columnNames
 
@@ -76,7 +97,10 @@ def displayStep1(docs):
 def displayStep2(words):
     pprint(words)
 
-def displayStep3(occurences):
+def displayStep3(filteredWords):
+    pprint(filteredWords)
+
+def displayStep4(occurences):
     table = PrettyTable(getColumnNames("Jumlah"))
     sortedOccurences = dict(sorted(occurences.items()))
     for word in sortedOccurences:
@@ -85,32 +109,32 @@ def displayStep3(occurences):
         table.add_row(row)
     print(table)
 
-def displayStep4(tfs):
+def displayStep5(tfs):
     table = PrettyTable(getColumnNames("TF"))
     sortedTfs = dict(sorted(tfs.items()))
     for word in sortedTfs:
         row = sortedTfs[word].copy()
-        row = ['%0.3f' % x for x in row]
+        row = [decimalNumber % x for x in row]
         row.insert(0, word)
         table.add_row(row)
     print(table)
 
-def displayStep5(idfs):
+def displayStep6(idfs):
     table = PrettyTable(["", "IDF"])
     sortedIdfs = dict(sorted(idfs.items()))
     for word in sortedIdfs:
         row = [sortedIdfs[word]]
-        row = ['%0.3f' % x for x in row]
+        row = [decimalNumber % x for x in row]
         row.insert(0, word)
         table.add_row(row)
     print(table)
 
-def displayStep6(tfIdfs):
+def displayStep7(tfIdfs):
     table = PrettyTable(getColumnNames("TF-IDF"))
     sortedTfIdfs = dict(sorted(tfIdfs.items()))
     for word in sortedTfIdfs:
         row = sortedTfIdfs[word].copy()
-        row = ['%0.3f' % x for x in row]
+        row = [decimalNumber % x for x in row]
         row.insert(0, word)
         table.add_row(row)
     print(table)
@@ -124,30 +148,29 @@ def display(title, step, data):
         case 4: displayStep4(data)
         case 5: displayStep5(data)
         case 6: displayStep6(data)
+        case 7: displayStep7(data)
 
-docs = readFiles(
-    [
-        "docs/doc1.txt",
-        "docs/doc2.txt",
-        "docs/doc3.txt",
-        "docs/doc4.txt"
-    ]
-)
-docLength = len(docs)
-display("\n1. Membaca file text", 1, docs)
+# docs = readFiles(filenames)
+# display("\n1. Membaca file text", 1, docs)
+
+docs = stemDocument(filenames)
+display("1. Stem dokumen", 1, docs)
 
 words = getWords(docs)
 display("\n2. Memecah text menjadi kata", 2, words)
 
-occurences = checkWords(words, docs)
-display("\n3. Periksa jumlah kemunculan kata di setiap text", 3, occurences)
+filteredWords = removeStopword(words)
+display("\n3. Menghapus stopword", 3, filteredWords)
 
-tfs = getTFs(occurences, words, docs)
-display("\n4. Hitung TF", 4, tfs)
+occurences = checkWords(filteredWords, docs)
+display("\n4. Periksa jumlah kemunculan kata di setiap text", 4, occurences)
 
-idfs = getIDFs(occurences, words, docs)
-display("\n5. Hitung IDF", 5, idfs)
+tfs = getTFs(occurences, filteredWords, docs)
+display("\n5. Hitung TF", 5, tfs)
 
-tfidfs = getTFIDF(tfs, idfs, words, docs)
-display("\n6. Hitung TF-IDF", 6, tfidfs)
+idfs = getIDFs(occurences, filteredWords, docs)
+display("\n6. Hitung IDF", 6, idfs)
+
+tfidfs = getTFIDF(tfs, idfs, filteredWords, docs)
+display("\n7. Hitung TF-IDF", 7, tfidfs)
 
