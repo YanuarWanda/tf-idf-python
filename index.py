@@ -1,6 +1,5 @@
 import os
 import math
-from pprint import pprint
 from prettytable import PrettyTable
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
@@ -9,7 +8,7 @@ os.system('cls' if os.name == 'nt' else 'clear')
 
 # Global variables
 decimalNumber = '%0.4f'
-filenames = ['docs/document.txt']
+filenames = ['docs/document-1.txt', 'docs/document-2.txt']
 # filenames = ["docs/doc1.txt", "docs/doc2.txt", "docs/doc3.txt", "docs/doc4.txt"]
 
 # Stem
@@ -50,7 +49,7 @@ def checkWords(words, docs):
             occurences[word].append(0)
             docWords = getWords([doc], False)
             for docWord in docWords:
-                if word in docWord:
+                if word == docWord:
                     occurences[word][docIndex] += 1
     return occurences
 
@@ -95,10 +94,10 @@ def displayStep1(docs):
         print(doc + "\n")
 
 def displayStep2(words):
-    pprint(words)
+    print(sorted(words))
 
 def displayStep3(filteredWords):
-    pprint(filteredWords)
+    print(sorted(filteredWords))
 
 def displayStep4(occurences):
     table = PrettyTable(getColumnNames("Jumlah"))
